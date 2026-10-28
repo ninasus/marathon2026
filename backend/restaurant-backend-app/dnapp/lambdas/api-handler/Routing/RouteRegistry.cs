@@ -167,6 +167,7 @@ public static class RouteRegistry
             new RouteHandler(new Route(HttpMethods.POST, "/reservations"), ActivatorUtilities.CreateInstance<CreateReservationHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations"), ActivatorUtilities.CreateInstance<GetReservationsForUserHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}"), ActivatorUtilities.CreateInstance<GetReservationByIdHandler>(provider)),
+            new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/guest-session-id"), ActivatorUtilities.CreateInstance<GetOwnerGuestSessionIdHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.PATCH, "/reservations/{reservationId}/status"), ActivatorUtilities.CreateInstance<UpdateReservationStatusHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.GET, "/reservations/{reservationId}/feedback"), ActivatorUtilities.CreateInstance<GetFeedbackForReservationHandler>(provider)),
             new RouteHandler(new Route(HttpMethods.DELETE, "/reservations"), ActivatorUtilities.CreateInstance<CancelReservationHandler>(provider)),

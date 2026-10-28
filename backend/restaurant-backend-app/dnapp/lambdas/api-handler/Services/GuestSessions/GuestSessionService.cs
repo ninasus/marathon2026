@@ -309,6 +309,36 @@ public class GuestSessionService(
         return new GetGroupSessionsResponse(participants, participants.Sum(participant => participant.Total));
     }
 
+    public async Task<GetOwnerGuestSessionIdResponse> GetOwnerGuestSessionIdAsync(string userId, string reservationId)
+    {
+        var reservation = await reservationRepository.GetReservationByIdAsync(reservationId)
+            ?? throw new ReservationNotFoundException($"Reservation '{reservationId}' not found.");
+
+        if (reservation.CustomerId != userId)
+        {
+            throw new ActionForbiddenException("Only the reservation owner can perform this action.");
+        }
+
+        var group = await groupReservationRepository.GetByReservationIdAsync(reservationId)
+            ?? throw new GroupReservationNotFoundException();
+
+        var ownerSessions = (await guestSessionRepository.GetAllByGroupReservationIdAsync(group.GroupReservationId))
+            .Where(session => session.IsOwnerSession && session.OwnerUserId == userId)
+            .ToArray();
+
+        if (ownerSessions.Length == 0)
+        {
+            throw new ValidationException("The reservation does not have an owner guest session.");
+        }
+
+        if (ownerSessions.Length > 1)
+        {
+            throw new ValidationException("The reservation has multiple owner guest sessions.");
+        }
+
+        return new GetOwnerGuestSessionIdResponse(ownerSessions[0].Id);
+    }
+
     public async Task SubmitCartAsync(string guestSessionId)
     {
         GuestSession guestSession = await GetGuestSessionAsync(guestSessionId);
