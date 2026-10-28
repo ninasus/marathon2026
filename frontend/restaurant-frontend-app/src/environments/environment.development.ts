@@ -1,4 +1,5 @@
 export const environment = {
-  // backendUrl: 'BACKEND_URL_PLACEHOLDER'
-  backendUrl: 'https://eknqcvq3l1.execute-api.us-west-2.amazonaws.com/develop',
+  // Рівні 1–2 домашки працюють на моках (?demo) — цю адресу не чіпай.
+  // Рівень 3: встав адресу свого бекенду (URL стейджу API Gateway) і перезапусти npm start.
+  backendUrl: 'https://YOUR-API-ID.execute-api.YOUR-REGION.amazonaws.com/develop',
 };
