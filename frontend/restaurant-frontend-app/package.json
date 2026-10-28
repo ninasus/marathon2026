@@ -1,17 +1,6 @@
 {
   "name": "restaurant-frontend-app",
   "version": "1.1.1",
-  "author": "EPAM",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/IT-Marathon/marathon2026"
-  },
-  "contributors": [
-    "Igor Ovcharenko <igor_ovcharenko@epam.com>",
-    "Mariia Polishchuk <mariia_polishchuk1@epam.com>",
-    "Kateryna Kolobova <kateryna_kolobova@epam.com>",
-    "Mariana Dekhtiarenko <mariana_dekhtiarenko@epam.com>"
-  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -20,6 +9,7 @@
     "postbuild": "node scripts/check-bundle.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:hw": "ng test --watch=false --include src/app/components/group-orders --include src/app/pages/group-order-page --include src/app/services/group-orders --include src/app/shared/helpers",
     "lint": "ng lint",
     "lint-fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\""
