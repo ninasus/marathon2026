@@ -1190,15 +1190,48 @@ Response: 200 OK
 ### `GET` /guest/groups/{groupReservationId}/sessions
 Response: 200 OK
 ```json
-[
-  {
-    "id": "string",
-    "groupReservationId": "string",
-    "guestName": "string",
-    "status": "string"
-  }
-]
+{
+  "participants": [
+    {
+      "id": null,
+      "type": "Guest",
+      "name": "Andrii",
+      "items": [
+        {
+          "dish": {
+            "id": "dish1",
+            "name": "Caesar Salad",
+            "price": 180
+          },
+          "quantity": 2
+        }
+      ],
+      "total": 360,
+      "isSubmitted": true
+    },
+    {
+      "id": "session2",
+      "type": "Guest",
+      "name": "Olena",
+      "items": [
+        {
+          "dish": {
+            "id": "dish2",
+            "name": "Tom Yum",
+            "price": 220
+          },
+          "quantity": 1
+        }
+      ],
+      "total": 220,
+      "isSubmitted": false
+    }
+  ],
+  "total": 580
+}
 ```
+
+Requires Cognito authentication by the parent reservation creator. Returns 400 for an invalid path, 401 when unauthenticated, 403 for another user, and 404 when the group or parent reservation does not exist.
 
 ### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
 Response: 200 OK

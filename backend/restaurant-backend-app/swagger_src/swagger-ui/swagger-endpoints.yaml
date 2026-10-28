@@ -279,7 +279,7 @@ paths:
       tags:
         - Guest Sessions
       summary: Get all sessions for group reservation
-      description: Retrieves all guest sessions for a group reservation
+      description: Retrieves the reservation creator and all joined guest sessions for the reservation creator
       operationId: getAllSessionsForGroup
       parameters:
         - name: groupReservationId
@@ -296,15 +296,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllSessionsResponse'
+                $ref: '#/components/schemas/GetGroupSessionsResponse'
         '400':
           description: Invalid request - missing groupReservationId
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The authenticated user is not the reservation creator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Group reservation not found or GroupId is required
+          description: Group reservation or parent reservation not found
           content:
             application/json:
               schema:
@@ -636,21 +648,31 @@ components:
           description: Name of the person who invited the guests
           example: Jane Doe
 
-    GetAllSessionsResponse:
+    GetGroupSessionsResponse:
       type: object
+      required:
+        - participants
+        - total
       properties:
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/Participant'
+            $ref: '#/components/schemas/GroupSessionParticipant'
         total:
           type: number
           format: decimal
           description: Total cost for all participants
           example: 125.50
 
-    Participant:
+    GroupSessionParticipant:
       type: object
+      required:
+        - id
+        - type
+        - name
+        - items
+        - total
+        - isSubmitted
       properties:
         id:
           type: string
@@ -660,7 +682,6 @@ components:
         type:
           type: string
           enum:
-            - Owner
             - Guest
           description: Type of participant
           example: Guest
@@ -671,7 +692,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/OrderItemResponse'
+            $ref: '#/components/schemas/GroupSessionItem'
           description: Items ordered by the participant
         total:
           type: number
@@ -683,31 +704,39 @@ components:
           description: Whether the participant has submitted their cart
           example: true
 
-    OrderItemResponse:
+    GroupSessionItem:
       type: object
+      required:
+        - dish
+        - quantity
       properties:
-        dishId:
-          type: string
-          description: The ID of the dish
-          example: dish-123
-        dishName:
-          type: string
-          description: Name of the dish
-          example: Spaghetti Carbonara
+        dish:
+          $ref: '#/components/schemas/GroupSessionDish'
         quantity:
           type: integer
           description: Quantity ordered
           example: 2
+
+    GroupSessionDish:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: string
+          description: The ID of the dish
+          example: dish-123
+        name:
+          type: string
+          description: Name of the dish
+          example: Spaghetti Carbonara
         price:
           type: number
           format: decimal
           description: Price per unit
           example: 22.50
-        total:
-          type: number
-          format: decimal
-          description: Total price for this item
-          example: 45.00
 
     GetGroupInviteTokenResponse:
       type: object
