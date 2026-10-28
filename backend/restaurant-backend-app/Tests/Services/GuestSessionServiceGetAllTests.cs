@@ -132,19 +132,27 @@ public partial class GuestSessionServiceTests
     {
         ArrangeOwnedGroup();
         _mockGuestSessionRepository.Setup(r => r.GetAllByGroupReservationIdAsync(GroupId))
-            .ReturnsAsync([Session("owner-session", "Owner", true, true, Item("salad", 2))]);
+            .ReturnsAsync([
+                Session("owner-session", "Owner", true, true, Item("salad", 2)),
+                Session("guest-session", "Andrii", false, false)
+            ]);
         _mockDishRepository.Setup(r => r.GetDishesByIdsAsync(It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync([Dish("salad", "Caesar Salad", 180m)]);
 
         var result = await _guestSessionService.GetAllGuestSessionsAsync(OwnerId, GroupId);
 
-        var creator = Assert.Single(result.Participants);
+        var participants = result.Participants.ToArray();
+        Assert.Equal(2, participants.Length);
+        var creator = Assert.Single(participants, p => p.Type == GroupSessionParticipantType.Owner);
         Assert.Equal("owner-session", creator.Id);
         Assert.Equal("Andrii", creator.Name);
-        Assert.Equal(GroupSessionParticipantType.Guest, creator.Type);
         Assert.True(creator.IsSubmitted);
         Assert.Equal(("salad", "Caesar Salad", 180m, 2), ItemValues(Assert.Single(creator.Items)));
         Assert.Equal(360m, creator.Total);
+        Assert.Equal("guest-session", participants[1].Id);
+        Assert.Equal("Andrii", participants[1].Name);
+        Assert.Equal(GroupSessionParticipantType.Guest, participants[1].Type);
+        Assert.Empty(participants[1].Items);
         Assert.Equal(360m, result.Total);
     }
 
@@ -163,6 +171,7 @@ public partial class GuestSessionServiceTests
 
         var creator = Assert.Single(result.Participants);
         Assert.Equal("owner-session", creator.Id);
+        Assert.Equal(GroupSessionParticipantType.Owner, creator.Type);
         Assert.False(creator.IsSubmitted);
         Assert.Equal(("current-dish", "Current", 25m, 2), ItemValues(Assert.Single(creator.Items)));
         Assert.Equal(50m, result.Total);

@@ -67,6 +67,38 @@ public class GetAllGuestSessionsHandlerTests
     }
 
     [Fact]
+    public async Task HandleRequest_SerializesStoredOwnerAndOrdinaryGuestTypesAsStrings()
+    {
+        _service.Setup(s => s.GetAllGuestSessionsAsync("customer-1", "group-1"))
+            .ReturnsAsync(new GetGroupSessionsResponse(
+                [
+                    new GroupSessionParticipant("owner-session", GroupSessionParticipantType.Owner, "Andrii",
+                        [new GroupSessionItem(new GroupSessionDish("dish-1", "Salad", 18m), 2)], 36m, true),
+                    new GroupSessionParticipant("guest-session", GroupSessionParticipantType.Guest, "Andrii",
+                        [], 0m, false)
+                ],
+                36m));
+
+        var response = await new GetAllGuestSessionsHandler(_service.Object).HandleRequest(Request(), _context.Object);
+
+        Assert.Equal(200, response.StatusCode);
+        using var json = JsonDocument.Parse(response.Body);
+        var participants = json.RootElement.GetProperty("participants").EnumerateArray().ToArray();
+        Assert.Equal(2, participants.Length);
+        Assert.Equal("owner-session", participants[0].GetProperty("id").GetString());
+        Assert.Equal("Owner", participants[0].GetProperty("type").GetString());
+        Assert.Equal("guest-session", participants[1].GetProperty("id").GetString());
+        Assert.Equal("Guest", participants[1].GetProperty("type").GetString());
+        Assert.Equal("Andrii", participants[1].GetProperty("name").GetString());
+        var dish = Assert.Single(participants[0].GetProperty("items").EnumerateArray()).GetProperty("dish");
+        Assert.Equal(new[] { "id", "name", "price" }, dish.EnumerateObject().Select(p => p.Name));
+        Assert.Equal("dish-1", dish.GetProperty("id").GetString());
+        Assert.Equal("Salad", dish.GetProperty("name").GetString());
+        Assert.Equal(18m, dish.GetProperty("price").GetDecimal());
+        _service.Verify(s => s.GetAllGuestSessionsAsync("customer-1", "group-1"), Times.Once);
+    }
+
+    [Fact]
     public async Task HandleRequest_MissingGroupIdReturns400WithoutServiceCall()
     {
         var response = await new GetAllGuestSessionsHandler(_service.Object).HandleRequest(Request(groupId: null), _context.Object);

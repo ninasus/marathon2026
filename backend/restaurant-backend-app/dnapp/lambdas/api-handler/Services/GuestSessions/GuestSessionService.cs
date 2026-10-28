@@ -272,6 +272,7 @@ public class GuestSessionService(
 
         GroupSessionParticipant CreateParticipant(
             string? id,
+            GroupSessionParticipantType type,
             string name,
             IEnumerable<OrderItem> sourceItems,
             bool isSubmitted)
@@ -287,7 +288,7 @@ public class GuestSessionService(
             decimal total = items.Sum(item => item.Dish.Price * item.Quantity);
             return new GroupSessionParticipant(
                 id,
-                GroupSessionParticipantType.Guest,
+                type,
                 name,
                 items,
                 total,
@@ -296,12 +297,20 @@ public class GuestSessionService(
 
         var participants = new List<GroupSessionParticipant>
         {
-            CreateParticipant(ownerSession?.Id, ownerName, ownerItems, ownerIsSubmitted)
+            CreateParticipant(
+                ownerSession?.Id,
+                ownerSession is not null
+                    ? GroupSessionParticipantType.Owner
+                    : GroupSessionParticipantType.Guest,
+                ownerName,
+                ownerItems,
+                ownerIsSubmitted)
         };
 
         participants.AddRange(guestSessions.Select(session =>
             CreateParticipant(
                 session.Id,
+                GroupSessionParticipantType.Guest,
                 session.GuestName,
                 session.Dishes ?? [],
                 session.IsSubmitted)));

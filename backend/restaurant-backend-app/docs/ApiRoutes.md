@@ -1193,8 +1193,8 @@ Response: 200 OK
 {
   "participants": [
     {
-      "id": null,
-      "type": "Guest",
+      "id": "session1",
+      "type": "Owner",
       "name": "Andrii",
       "items": [
         {
@@ -1231,7 +1231,6 @@ Response: 200 OK
 }
 ```
 
-Requires Cognito authentication by the parent reservation creator. Returns 400 for an invalid path, 401 when unauthenticated, 403 for another user, and 404 when the group or parent reservation does not exist.
 
 ### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
 Response: 200 OK

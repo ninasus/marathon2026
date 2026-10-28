@@ -682,9 +682,10 @@ components:
         type:
           type: string
           enum:
+            - Owner
             - Guest
-          description: Type of participant
-          example: Guest
+          description: Owner when backed by a stored owner session; otherwise Guest
+          example: Owner
         name:
           type: string
           description: Name of the participant
