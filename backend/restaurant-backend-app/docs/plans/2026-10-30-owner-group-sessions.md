@@ -7,7 +7,7 @@ Add `GET /guest/groups/{groupReservationId}/sessions` for the authenticated owne
 ## Scope and affected code
 
 - Add a handler under `dnapp/lambdas/api-handler/Handlers/GuestSessions` that reads `groupReservationId` and the Cognito `sub` claim, calls the service, and maps missing group/reservation to 404 and non-owner to 403.
-- Add `GetAllSessionsAsync(userId, groupReservationId)` to `IGuestSessionService` and `GuestSessionService`. Reuse existing reservation-owner validation, `IGuestSessionRepository.GetAllByGroupReservationIdAsync`, bulk dish lookup, and owner-name lookup. Calculate prices with `decimal`. If any `GuestSession.Dishes` item references a dish absent from the catalog, fail the entire request with HTTP 400. The list is derived from stored sessions; no session or order is mutated by GET.
+- Add `GetAllSessionsAsync(userId, groupReservationId)` to `IGuestSessionService` and `GuestSessionService`. Reuse existing reservation-owner validation, `IGuestSessionRepository.GetAllByGroupReservationIdAsync`, bulk dish lookup, and owner-name lookup. Calculate prices with `decimal`. If any `GuestSession.Dishes` item references a dish absent from the catalog, fail the entire request with HTTP 404. The list is derived from stored sessions; no session or order is mutated by GET.
 - Add a response DTO in `Models/GuestSessions` for the exact requested JSON fields, using the existing `ParticipantType` string enum behavior. Keep existing delete-session response behavior intact.
 - Register the route in `Routing/RouteRegistry.cs`. Correct the existing singular `/guest/group/{groupReservationId}/sessions` resource to the requested plural `/guest/groups/{groupReservationId}/sessions` in `deployment_resources.json`, retaining Cognito authorization.
 - No new DynamoDB index or repository method is needed; the group-reservation ID index and list query already exist.
@@ -30,4 +30,4 @@ Add `GET /guest/groups/{groupReservationId}/sessions` for the authenticated owne
 ## Material risks and decisions
 
 - `CreateGroupOwnerSessionAsync` currently has no caller in this repository. This endpoint reports an owner row only when an owner `GuestSession` has been created by the existing workflow or data. Creating or populating that session is outside this read endpoint's scope; if live owner sessions are absent, that needs a separate production change.
-- Dish prices and names come from the current dish catalog because `GuestSession.Dishes` stores only dish IDs and quantities. A deleted catalog dish cannot be faithfully priced from the stored session; the agreed response is HTTP 400 for the entire request.
+- Dish prices and names come from the current dish catalog because `GuestSession.Dishes` stores only dish IDs and quantities. A deleted catalog dish cannot be faithfully priced from the stored session; the agreed response is HTTP 404 for the entire request.

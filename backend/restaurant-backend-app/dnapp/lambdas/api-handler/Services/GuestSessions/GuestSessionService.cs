@@ -234,7 +234,7 @@ public class GuestSessionService(
 
         var missingDishId = dishIds.FirstOrDefault(dishId => !dishesById.ContainsKey(dishId));
         if (missingDishId is not null)
-            throw new ValidationException($"Dish '{missingDishId}' referenced by a guest session was not found.");
+            throw new DishNotFoundException($"Dish '{missingDishId}' referenced by a guest session was not found.");
 
         string? ownerName = null;
         if (sessions.Any(session => session.IsOwnerSession))

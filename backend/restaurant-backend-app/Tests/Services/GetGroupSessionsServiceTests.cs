@@ -197,7 +197,7 @@ public class GetGroupSessionsServiceTests
         _dishes.Setup(repository => repository.GetDishesByIdsAsync(It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync([new Dish { Id = "salad", Name = "Caesar Salad", Price = 180m }]);
 
-        var exception = await Assert.ThrowsAsync<ValidationException>(() => _service.GetAllSessionsAsync(OwnerId, GroupId));
+        var exception = await Assert.ThrowsAsync<DishNotFoundException>(() => _service.GetAllSessionsAsync(OwnerId, GroupId));
 
         Assert.Contains("deleted-dish", exception.Message);
         _sessions.Verify(repository => repository.SaveAsync(It.IsAny<GuestSession>()), Times.Never);

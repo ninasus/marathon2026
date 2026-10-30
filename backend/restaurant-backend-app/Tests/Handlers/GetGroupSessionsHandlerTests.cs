@@ -91,14 +91,14 @@ public class GetGroupSessionsHandlerTests
     }
 
     [Fact]
-    public async Task HandleRequest_DeletedCatalogDishReturnsBadRequestWithoutPartialList()
+    public async Task HandleRequest_DeletedCatalogDishReturnsNotFoundWithoutPartialList()
     {
         _service.Setup(service => service.GetAllSessionsAsync("owner-1", "group-1"))
-            .ThrowsAsync(new ValidationException("Dish 'deleted-dish' referenced by a guest session was not found."));
+            .ThrowsAsync(new DishNotFoundException("Dish 'deleted-dish' referenced by a guest session was not found."));
 
         var response = await Handler().HandleRequest(Request("owner-1"), _context.Object);
 
-        Assert.Equal(400, response.StatusCode);
+        Assert.Equal(404, response.StatusCode);
         Assert.DoesNotContain("participants", response.Body);
         Assert.DoesNotContain("total", response.Body);
     }

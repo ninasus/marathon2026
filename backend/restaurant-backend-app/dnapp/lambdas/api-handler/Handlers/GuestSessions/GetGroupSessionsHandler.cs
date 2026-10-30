@@ -36,6 +36,10 @@ public class GetGroupSessionsHandler(IGuestSessionService guestSessionService) :
         {
             return ResponseBuilder.CreateErrorResponse(403, exception.Message, context.Logger);
         }
+        catch (DishNotFoundException exception)
+        {
+            return ResponseBuilder.CreateErrorResponse(404, exception.Message, context.Logger);
+        }
         catch (ValidationException exception)
         {
             return ResponseBuilder.CreateErrorCodeResponse(exception);
