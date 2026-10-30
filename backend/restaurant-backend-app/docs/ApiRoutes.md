@@ -1190,14 +1190,28 @@ Response: 200 OK
 ### `GET` /guest/groups/{groupReservationId}/sessions
 Response: 200 OK
 ```json
-[
-  {
-    "id": "string",
-    "groupReservationId": "string",
-    "guestName": "string",
-    "status": "string"
-  }
-]
+{
+  "participants": [
+    {
+      "id": "guest-session-id",
+      "type": "Guest",
+      "name": "Olena",
+      "items": [
+        {
+          "dish": {
+            "id": "dish-id",
+            "name": "Tom Yum",
+            "price": 220
+          },
+          "quantity": 1
+        }
+      ],
+      "total": 220,
+      "isSubmitted": false
+    }
+  ],
+  "total": 220
+}
 ```
 
 ### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}

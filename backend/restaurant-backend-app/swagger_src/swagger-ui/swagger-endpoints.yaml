@@ -298,13 +298,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetAllSessionsResponse'
         '400':
-          description: Invalid request - missing groupReservationId
+          description: Invalid request, including a session that references a deleted catalog dish
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Only the reservation owner may retrieve participant sessions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Group reservation not found or GroupId is required
+          description: Group reservation or parent reservation not found
           content:
             application/json:
               schema:
@@ -638,24 +650,33 @@ components:
 
     GetAllSessionsResponse:
       type: object
+      required:
+        - participants
+        - total
       properties:
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/Participant'
+            $ref: '#/components/schemas/GroupSessionParticipant'
         total:
           type: number
           format: decimal
           description: Total cost for all participants
           example: 125.50
 
-    Participant:
+    GroupSessionParticipant:
       type: object
+      required:
+        - id
+        - type
+        - name
+        - items
+        - total
+        - isSubmitted
       properties:
         id:
           type: string
-          nullable: true
-          description: Session ID of the participant
+          description: The participant's GuestSession.Id
           example: session-123
         type:
           type: string
@@ -671,7 +692,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/OrderItemResponse'
+            $ref: '#/components/schemas/GroupSessionItem'
           description: Items ordered by the participant
         total:
           type: number
@@ -683,31 +704,39 @@ components:
           description: Whether the participant has submitted their cart
           example: true
 
-    OrderItemResponse:
+    GroupSessionItem:
       type: object
+      required:
+        - dish
+        - quantity
       properties:
-        dishId:
-          type: string
-          description: The ID of the dish
-          example: dish-123
-        dishName:
-          type: string
-          description: Name of the dish
-          example: Spaghetti Carbonara
+        dish:
+          $ref: '#/components/schemas/GroupSessionDish'
         quantity:
           type: integer
           description: Quantity ordered
           example: 2
+
+    GroupSessionDish:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: string
+          description: The catalog dish ID
+          example: dish-123
+        name:
+          type: string
+          description: The current catalog dish name
+          example: Spaghetti Carbonara
         price:
           type: number
           format: decimal
-          description: Price per unit
+          description: Current catalog price per unit
           example: 22.50
-        total:
-          type: number
-          format: decimal
-          description: Total price for this item
-          example: 45.00
 
     GetGroupInviteTokenResponse:
       type: object
