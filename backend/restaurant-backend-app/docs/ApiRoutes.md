@@ -555,13 +555,13 @@ Response: `200 OK`
 ```
 
 ### `GET` /reservations/{reservationId}/guest-session-id
+
 Response: `200 OK`
 ```json
 {
   "guestSessionId": "string"
 }
 ```
-
 
 ### `DELETE` /reservations
 Request body:
