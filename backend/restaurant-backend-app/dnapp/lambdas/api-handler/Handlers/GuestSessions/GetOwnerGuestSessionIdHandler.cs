@@ -12,9 +12,8 @@ public class GetOwnerGuestSessionIdHandler(IGuestSessionService guestSessionServ
 {
     public async Task<APIGatewayProxyResponse> HandleRequest(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        if (request.RequestContext?.Authorizer?.Claims is null ||
-            !request.RequestContext.Authorizer.Claims.TryGetValue("sub", out string? userId) ||
-            string.IsNullOrWhiteSpace(userId))
+        string? userId = UserContextHelper.GetAuthenticatedUserId(request);
+        if (userId is null)
             return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
 
         if (!request.TryGetPathValue("reservationId", out string? reservationId))

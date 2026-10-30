@@ -46,6 +46,48 @@ public class GetOwnerGuestSessionIdHandlerTests
     }
 
     [Fact]
+    public async Task HandleRequest_MissingRequestContextReturnsUnauthorizedWithoutServiceCall()
+    {
+        var request = Request("owner-1");
+        request.RequestContext = null!;
+
+        var response = await Handler().HandleRequest(request, _context.Object);
+
+        Assert.Equal(401, response.StatusCode);
+        _service.Verify(
+            service => service.GetOwnerGuestSessionIdAsync(It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleRequest_MissingClaimsReturnsUnauthorizedWithoutServiceCall()
+    {
+        var request = Request("owner-1");
+        request.RequestContext.Authorizer.Claims = null;
+
+        var response = await Handler().HandleRequest(request, _context.Object);
+
+        Assert.Equal(401, response.StatusCode);
+        _service.Verify(
+            service => service.GetOwnerGuestSessionIdAsync(It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleRequest_NullSubReturnsUnauthorizedWithoutServiceCall()
+    {
+        var request = Request("owner-1");
+        request.RequestContext.Authorizer.Claims["sub"] = null!;
+
+        var response = await Handler().HandleRequest(request, _context.Object);
+
+        Assert.Equal(401, response.StatusCode);
+        _service.Verify(
+            service => service.GetOwnerGuestSessionIdAsync(It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
     public async Task HandleRequest_NonOwnerReturnsForbiddenWithoutLeakingSessionId()
     {
         _service
