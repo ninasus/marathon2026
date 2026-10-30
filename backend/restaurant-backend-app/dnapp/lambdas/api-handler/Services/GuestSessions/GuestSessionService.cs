@@ -214,6 +214,62 @@ public class GuestSessionService(
 
         return new GetAllSessionsResponse(participants, participants.Sum(p => p.Total));
     }
+
+    public async Task<GetGroupSessionsResponse> GetAllSessionsAsync(string userId, string groupReservationId)
+    {
+        await ValidateReservationOwnerAsync(groupReservationId, userId);
+
+        var sessions = await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId);
+        if (sessions.Count == 0)
+            return new GetGroupSessionsResponse([], 0);
+
+        var dishIds = sessions
+            .SelectMany(session => session.Dishes ?? [])
+            .Select(item => item.DishId)
+            .Distinct()
+            .ToArray();
+
+        var dishes = await dishRepository.GetDishesByIdsAsync(dishIds);
+        var dishesById = dishes.ToDictionary(dish => dish.Id);
+
+        var missingDishId = dishIds.FirstOrDefault(dishId => !dishesById.ContainsKey(dishId));
+        if (missingDishId is not null)
+            throw new ValidationException($"Dish '{missingDishId}' referenced by a guest session was not found.");
+
+        string? ownerName = null;
+        if (sessions.Any(session => session.IsOwnerSession))
+        {
+            var owner = await userRepository.GetUserByIdAsync(userId);
+            ownerName = owner?.Attributes.FirstOrDefault(attribute => attribute.Name == "given_name")?.Value;
+        }
+
+        var participants = sessions.Select(session =>
+        {
+            var items = (session.Dishes ?? []).Select(item =>
+            {
+                var dish = dishesById[item.DishId];
+                return new GroupSessionItem(
+                    new GroupSessionDish(dish.Id, dish.Name, dish.Price),
+                    item.Quantity);
+            }).ToArray();
+
+            decimal total = items.Sum(item => item.Quantity * item.Dish.Price);
+            string name = session.IsOwnerSession && !string.IsNullOrWhiteSpace(ownerName)
+                ? ownerName
+                : session.GuestName;
+
+            return new GroupSessionParticipant(
+                session.Id,
+                session.IsOwnerSession ? ParticipantType.Owner : ParticipantType.Guest,
+                name,
+                items,
+                total,
+                session.IsSubmitted);
+        }).ToArray();
+
+        return new GetGroupSessionsResponse(participants, participants.Sum(participant => participant.Total));
+    }
+
     public async Task SubmitCartAsync(string guestSessionId)
     {
         GuestSession guestSession = await GetGuestSessionAsync(guestSessionId);
