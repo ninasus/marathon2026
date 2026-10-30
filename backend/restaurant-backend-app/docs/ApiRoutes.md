@@ -1190,47 +1190,15 @@ Response: 200 OK
 ### `GET` /guest/groups/{groupReservationId}/sessions
 Response: 200 OK
 ```json
-{
-  "participants": [
-    {
-      "id": "session1",
-      "type": "Owner",
-      "name": "Andrii",
-      "items": [
-        {
-          "dish": {
-            "id": "dish1",
-            "name": "Caesar Salad",
-            "price": 180
-          },
-          "quantity": 2
-        }
-      ],
-      "total": 360,
-      "isSubmitted": true
-    },
-    {
-      "id": "session2",
-      "type": "Guest",
-      "name": "Olena",
-      "items": [
-        {
-          "dish": {
-            "id": "dish2",
-            "name": "Tom Yum",
-            "price": 220
-          },
-          "quantity": 1
-        }
-      ],
-      "total": 220,
-      "isSubmitted": false
-    }
-  ],
-  "total": 580
-}
+[
+  {
+    "id": "string",
+    "groupReservationId": "string",
+    "guestName": "string",
+    "status": "string"
+  }
+]
 ```
-
 
 ### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
 Response: 200 OK
