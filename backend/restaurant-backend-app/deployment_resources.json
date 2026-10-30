@@ -918,7 +918,7 @@
           "enable_proxy": true
         }
       },
-      "/guest/groups/{groupReservationId}/sessions": {
+      "/guest/group/{groupReservationId}/sessions": {
         "enable_cors": {
           "state": true
         },
