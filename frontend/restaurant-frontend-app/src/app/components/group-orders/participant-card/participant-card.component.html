@@ -1,6 +1,11 @@
 <article class="card">
   <h2 class="title">{{ title() }}</h2>
-
+  @if (participant().isSubmitted) {
+	  <span class="chip submitted">Submitted</span>
+	} @else {
+	  <span class="chip pending">Still choosing</span>
+	}
+	
   @if (participant().items.length) {
     <ul class="items">
       @for (item of participant().items; track item.dish.id) {
