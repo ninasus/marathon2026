@@ -1,0 +1,163 @@
+@use 'app/shared/styles/abstracts/colors' as color;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.card {
+  padding: 22px 20px 18px;
+  border-radius: 14px;
+  background: color.$neutral-0;
+  box-shadow: 0 8px 24px color.$shadow;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title {
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.chip {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.submitted {
+  border-color: color.$green-150;
+  background: color.$green-100;
+  color: color.$green-800;
+}
+
+.pending {
+  border-color: color.$orange-100;
+  background: color.$orange-30;
+  color: color.$orange-600;
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto minmax(70px, auto);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid color.$neutral-100;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.initial {
+  display: grid;
+  place-items: center;
+  background: color.$green-100;
+  color: color.$green-800;
+}
+
+.name,
+.qty,
+.price {
+  margin: 0;
+}
+
+.name {
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+
+  span,
+  small {
+    display: block;
+  }
+
+  small {
+    margin-top: 3px;
+    color: color.$neutral-600;
+    font-size: 0.75rem;
+    font-weight: 400;
+  }
+}
+
+.qty {
+  color: color.$neutral-700;
+  white-space: nowrap;
+}
+
+.price {
+  justify-self: end;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.empty {
+  margin: 14px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: color.$neutral-100;
+  color: color.$neutral-600;
+  text-align: center;
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 16px 0 0;
+  padding: 16px 12px 0;
+  font-size: 1rem;
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 18px 14px 16px;
+  }
+
+  .card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .item {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px 10px;
+  }
+
+  .avatar {
+    grid-row: 1 / 3;
+  }
+
+  .price {
+    grid-column: 2 / 4;
+    grid-row: 2;
+  }
+
+  .subtotal {
+    padding-inline: 0;
+  }
+}
