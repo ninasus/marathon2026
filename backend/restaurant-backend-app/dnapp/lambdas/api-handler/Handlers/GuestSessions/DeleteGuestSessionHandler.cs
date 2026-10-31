@@ -32,7 +32,7 @@ public class DeleteGuestSessionHandler : IApiRequestHandler
         var callerUserId = UserContextHelper.GetAuthenticatedUserId(request);
         if (callerUserId is null)
         {
-            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized: User ID is missing.", context.Logger);
+            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
         }
 
         try

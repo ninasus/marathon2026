@@ -83,7 +83,7 @@ public class DeleteGuestSessionHandlerTests
         APIGatewayProxyResponse response = await Handler().HandleRequest(Request("   "), _context.Object);
 
         Assert.Equal(401, response.StatusCode);
-        Assert.Equal("{\"error\":\"Unauthorized: User ID is missing.\"}", response.Body);
+        Assert.Equal("{\"error\":\"Unauthorized.\"}", response.Body);
         VerifyNoServiceCall();
     }
 
