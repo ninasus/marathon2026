@@ -1,5 +1,30 @@
 # API Routes
 
+## Group reservations
+
+### `POST` /group-reservations/{groupReservationId}/submit
+
+Request body:
+```json
+{
+  "reservationId": "reservation-123"
+}
+```
+
+Response: `200 OK`
+```json
+[
+  {
+    "dishId": "dish1",
+    "quantity": 3
+  },
+  {
+    "dishId": "dish2",
+    "quantity": 2
+  }
+]
+```
+
 ## Auth
 
 ### `POST` /register

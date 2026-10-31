@@ -5,11 +5,14 @@ using APIHandler.Models.GroupReservation;
 using APIHandler.Models.GuestReservation;
 using APIHandler.Repositories.GroupReservations;
 using APIHandler.Repositories.GuestSessions;
+using APIHandler.Repositories.Orders;
 using APIHandler.Repositories.Reservations;
 using APIHandler.Repositories.Tables;
 using APIHandler.Services.Auth;
 using APIHandler.Services.Locations;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace APIHandler.Services.GroupReservations;
@@ -20,7 +23,8 @@ public class GroupReservationService(
     IReservationRepository reservationRepository,
     IGuestSessionRepository guestSessionRepository,
     IUserService userService,
-    ILocationService locationService) : IGroupReservationService
+    ILocationService locationService,
+    IOrderRepository orderRepository) : IGroupReservationService
 {
     private const string DefaultRestaurantName = "Green & Tasty";
 
@@ -141,6 +145,75 @@ public class GroupReservationService(
             throw new GroupReservationExpiredException();
 
         return new GetGroupInviteTokenResponse(groupReservation.ReservationToken);
+    }
+
+    public async Task<IReadOnlyList<SubmitGroupPreOrderResponse>> SubmitGroupPreOrderAsync(
+        string userId,
+        string groupReservationId,
+        string reservationId)
+    {
+        GroupReservation groupReservation = await groupReservationRepository
+            .GetGroupReservationByIdAsync(groupReservationId)
+            ?? throw new GroupReservationNotFoundException();
+
+        Reservation reservation = await reservationRepository.GetReservationByIdAsync(reservationId)
+            ?? throw new ReservationNotFoundException($"Reservation '{reservationId}' was not found.");
+
+        if (!string.Equals(groupReservation.ReservationId, reservationId, StringComparison.Ordinal))
+            throw new ActionForbiddenException("The group reservation does not belong to the specified reservation.");
+
+        if (!string.Equals(reservation.CustomerId, userId, StringComparison.OrdinalIgnoreCase))
+            throw new ActionForbiddenException("Only the reservation owner can submit the group pre-order.");
+
+        EnsureGroupCanBeSubmitted(groupReservation);
+
+        List<GuestSession> submittedSessions = (await guestSessionRepository
+                .GetAllByGroupReservationIdAsync(groupReservationId))
+            .Where(session => session.IsSubmitted)
+            .ToList();
+
+        if (submittedSessions.Count == 0)
+            throw new ValidationException("There are no submitted guest sessions.");
+
+        List<OrderItem> submittedDishes = submittedSessions
+            .SelectMany(session => session.Dishes ?? [])
+            .ToList();
+
+        if (submittedDishes.Count == 0)
+            throw new ValidationException("There are no dishes in the submitted guest sessions.");
+
+        List<OrderItem> consolidatedDishes = submittedDishes
+            .GroupBy(item => item.DishId)
+            .Select(group => new OrderItem
+            {
+                DishId = group.Key,
+                Quantity = group.Sum(item => item.Quantity),
+                State = Constants.Orders.OrderItemState.Pending
+            })
+            .ToList();
+
+        Order order = await orderRepository.GetOrderByReservationIdAsync(reservationId)
+            ?? throw new ValidationException("No order was found for the specified reservation.");
+
+        order.Dishes = consolidatedDishes;
+        order.Status = OrderStatus.SubmittedByCustomer;
+        await orderRepository.SaveOrderAsync(order);
+
+        groupReservation.Status = GroupReservationStatus.Submitted;
+        await groupReservationRepository.SaveGroupReservationAsync(groupReservation);
+
+        return consolidatedDishes
+            .Select(item => new SubmitGroupPreOrderResponse(item.DishId, item.Quantity))
+            .ToArray();
+    }
+
+    private static void EnsureGroupCanBeSubmitted(GroupReservation groupReservation)
+    {
+        if (groupReservation.Status == GroupReservationStatus.Submitted)
+            throw new GroupReservationNotFoundException();
+
+        if (groupReservation.Status == GroupReservationStatus.Closed)
+            throw new GroupReservationExpiredException();
     }
 }
 
