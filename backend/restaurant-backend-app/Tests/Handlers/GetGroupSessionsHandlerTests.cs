@@ -62,6 +62,16 @@ public class GetGroupSessionsHandlerTests
     }
 
     [Fact]
+    public async Task HandleRequest_WhitespaceIdentityReturnsUnauthorizedWithoutServiceCall()
+    {
+        var response = await Handler().HandleRequest(Request("   "), _context.Object);
+
+        Assert.Equal(401, response.StatusCode);
+        Assert.Equal("{\"error\":\"Unauthorized: User ID is missing.\"}", response.Body);
+        _service.Verify(service => service.GetAllSessionsAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
     public async Task HandleRequest_DifferentReservationOwnerReturnsForbidden()
     {
         _service.Setup(service => service.GetAllSessionsAsync("other-user", "group-1"))

@@ -29,16 +29,16 @@ public class DeleteGuestSessionHandler : IApiRequestHandler
             return ResponseBuilder.CreateErrorResponse(400, "Missing 'guestSessionId' in path parameters.", context.Logger);
         }
 
-        if (request.RequestContext?.Authorizer?.Claims == null ||
-            !request.RequestContext.Authorizer.Claims.TryGetValue("sub", out var userId))
+        var callerUserId = UserContextHelper.GetAuthenticatedUserId(request);
+        if (callerUserId is null)
         {
-            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized.", context.Logger);
+            return ResponseBuilder.CreateErrorResponse(401, "Unauthorized: User ID is missing.", context.Logger);
         }
 
         try
         {
-            var updatedSnapshot = await _guestSessionService.DeleteGuestSessionAsync(userId, groupReservationId, guestSessionId);
-            return ResponseBuilder.CreateSuccessResponse(updatedSnapshot);
+            var updatedSnapshot = await _guestSessionService.DeleteGuestSessionAsync(callerUserId, groupReservationId, guestSessionId);
+            return ResponseBuilder.CreateJsonResponse(200, updatedSnapshot);
         }
         catch (GroupReservationNotFoundException ex)
         {
@@ -55,6 +55,10 @@ public class DeleteGuestSessionHandler : IApiRequestHandler
         catch (ActionForbiddenException ex)
         {
             return ResponseBuilder.CreateErrorResponse(403, ex.Message, context.Logger);
+        }
+        catch (DishNotFoundException ex)
+        {
+            return ResponseBuilder.CreateErrorResponse(404, ex.Message, context.Logger);
         }
         catch (ValidationException ex)
         {

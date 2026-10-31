@@ -1243,6 +1243,25 @@ Response: 200 OK
 Response: 200 OK
 ```json
 {
-  "message": "Guest session removed from group successfully."
+  "participants": [
+    {
+      "id": "owner-session-id",
+      "type": "Owner",
+      "name": "Andrii",
+      "items": [
+        {
+          "dish": {
+            "id": "dish-id",
+            "name": "Caesar Salad",
+            "price": 180
+          },
+          "quantity": 2
+        }
+      ],
+      "total": 360,
+      "isSubmitted": true
+    }
+  ],
+  "total": 360
 }
 ```

@@ -18,3 +18,9 @@ public record GroupSessionParticipant(
 public record GroupSessionItem(GroupSessionDish Dish, int Quantity);
 
 public record GroupSessionDish(string Id, string Name, decimal Price);
+
+public enum ParticipantType
+{
+    Owner,
+    Guest
+}
