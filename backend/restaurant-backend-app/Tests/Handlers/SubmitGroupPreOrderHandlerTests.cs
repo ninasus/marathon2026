@@ -47,10 +47,10 @@ public class SubmitGroupPreOrderHandlerTests
     }
 
     [Fact]
-    public async Task HandleRequest_MissingRequestContextReturns401WithoutServiceCall()
+    public async Task HandleRequest_MissingAuthorizerReturns401WithoutServiceCall()
     {
         var request = Request();
-        request.RequestContext = null!;
+        request.RequestContext.Authorizer = null!;
 
         var response = await Handler().HandleRequest(request, _context.Object);
 

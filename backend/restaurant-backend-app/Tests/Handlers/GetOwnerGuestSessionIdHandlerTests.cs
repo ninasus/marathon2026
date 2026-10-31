@@ -46,10 +46,10 @@ public class GetOwnerGuestSessionIdHandlerTests
     }
 
     [Fact]
-    public async Task HandleRequest_MissingRequestContextReturnsUnauthorizedWithoutServiceCall()
+    public async Task HandleRequest_MissingAuthorizerReturnsUnauthorizedWithoutServiceCall()
     {
         var request = Request("owner-1");
-        request.RequestContext = null!;
+        request.RequestContext.Authorizer = null!;
 
         var response = await Handler().HandleRequest(request, _context.Object);
 

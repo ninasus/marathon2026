@@ -108,7 +108,7 @@ public class SubmitGroupPreOrderServiceTests
         _groups.Setup(r => r.GetGroupReservationByIdAsync(GroupId))
             .ReturnsAsync(new GroupReservation { GroupReservationId = GroupId, ReservationId = "other-reservation", ReservationToken = "token", Status = GroupReservationStatus.Open });
 
-        await Assert.ThrowsAsync<ValidationException>(() =>
+        await Assert.ThrowsAsync<ActionForbiddenException>(() =>
             _service.SubmitGroupPreOrderAsync(OwnerId, GroupId, ReservationId));
 
         VerifyNoWrites();
