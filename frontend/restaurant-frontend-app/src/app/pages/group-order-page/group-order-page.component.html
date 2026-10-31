@@ -1,0 +1,9 @@
+<main class="page">
+  <h1>Group Pre-Order</h1>
+
+  <ul class="participants">
+    @for (person of participants(); track person.id) {
+      <li><app-participant-card [participant]="person" /></li>
+    }
+  </ul>
+</main>
