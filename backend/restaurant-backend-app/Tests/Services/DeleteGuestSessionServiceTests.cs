@@ -169,16 +169,19 @@ public class DeleteGuestSessionServiceTests
     }
 
     [Fact]
-    public async Task DeleteGuestSessionAsync_OwnerSessionReturnsValidationErrorWithoutMutation()
+    public async Task DeleteGuestSessionAsync_OwnerCanDeleteOwnerSessionAndReturnsUpdatedSnapshot()
     {
         var target = Session(TargetId, "Owner", true, false);
         _sessions.Setup(repository => repository.GetByGuestSessionId(TargetId)).ReturnsAsync(target);
+        _sessions.Setup(repository => repository.GetAllByGroupReservationIdAsync(GroupId))
+            .ReturnsAsync([target]);
 
-        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(() =>
-            _service.DeleteGuestSessionAsync(OwnerId, GroupId, TargetId));
+        GetGroupSessionsResponse response = await _service.DeleteGuestSessionAsync(OwnerId, GroupId, TargetId);
 
-        Assert.Contains("owner session", exception.Message, StringComparison.OrdinalIgnoreCase);
-        VerifyNoMutationOrRequery();
+        Assert.Empty(response.Participants);
+        Assert.Equal(0m, response.Total);
+        _sessions.Verify(repository => repository.DeleteAsync(target), Times.Once);
+        _sessions.Verify(repository => repository.GetAllByGroupReservationIdAsync(GroupId), Times.Once);
     }
 
     [Fact]

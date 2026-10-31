@@ -453,8 +453,8 @@ paths:
     delete:
       tags:
         - Guest Sessions
-      summary: Delete guest session
-      description: Deletes a guest participant session for the reservation owner, then returns the recalculated group snapshot
+      summary: Delete participant session
+      description: Deletes a participant session, including the owner's session, for the reservation owner, then returns the recalculated group snapshot
       operationId: deleteGuestSession
       parameters:
         - name: groupReservationId
@@ -479,7 +479,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetAllSessionsResponse'
         '400':
-          description: Missing path parameter, session belongs to another group, or target is the owner session
+          description: Missing path parameter or session belongs to another group
           content:
             application/json:
               schema:

@@ -182,9 +182,6 @@ public class GuestSessionService(
         if (!string.Equals(session.GroupReservationId, groupReservationId, StringComparison.Ordinal))
             throw new ValidationException("Guest session does not belong to this group reservation.");
 
-        if (session.IsOwnerSession)
-            throw new ValidationException("The owner session cannot be removed from the group reservation.");
-
         await guestSessionRepository.DeleteAsync(session);
 
         var remainingSessions = (await guestSessionRepository.GetAllByGroupReservationIdAsync(groupReservationId))
