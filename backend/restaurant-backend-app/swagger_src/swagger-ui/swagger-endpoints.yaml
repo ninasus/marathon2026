@@ -157,12 +157,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /guest/groups/{groupReservationId}/submit:
+  /group-reservations/{groupReservationId}/submit:
     post:
       tags:
         - Group Reservations
       summary: Submit group pre-order
-      description: Submits the pre-order for a group reservation, converting guest sessions to orders
+      description: Consolidates submitted guest-session dishes into the existing order and submits it for restaurant processing. Only the reservation owner may call this operation.
       operationId: submitGroupPreOrder
       parameters:
         - name: groupReservationId
@@ -185,14 +185,21 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  description: Enriched dishes data
+                  $ref: '#/components/schemas/ConsolidatedOrderItem'
         '400':
           description: Invalid request - missing parameters or validation error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication is required
+        '403':
+          description: Only the reservation owner may submit the group pre-order
+        '404':
+          description: Reservation or group reservation not found, including a group already submitted
+        '409':
+          description: Group reservation is closed
         '500':
           description: Internal server error
           content:
@@ -584,6 +591,20 @@ components:
           type: string
           description: The ID of the reservation (owner of the group)
           example: res-123
+
+    ConsolidatedOrderItem:
+      type: object
+      required:
+        - dishId
+        - quantity
+      properties:
+        dishId:
+          type: string
+          example: dish1
+        quantity:
+          type: integer
+          minimum: 1
+          example: 3
 
     GroupReservationStatusResponse:
       type: object
