@@ -1,57 +1,134 @@
 <main class="page">
   <section class="review" aria-labelledby="group-order-title">
-    <header class="page-header">
-      <div class="title-row">
+    @if (loading()) {
+      <div class="screen-state" role="status">Loading group pre-order…</div>
+    } @else if (errorMessage()) {
+      <div class="screen-state error-state" role="alert">
         <h1 id="group-order-title">Group Pre-Order</h1>
-        <span class="order-type">Created New Pre-Order</span>
+        <p>{{ errorMessage() }}</p>
+        <button class="secondary-button" type="button" (click)="loadData()">Try again</button>
       </div>
+    } @else {
+      @if (invite(); as reservation) {
+        <header class="page-header">
+          <div class="title-row">
+            <h1 id="group-order-title">Group Pre-Order</h1>
+            <span class="status-badge" [class.status-badge--submitted]="status() === 'Submitted'">
+              {{ statusLabel() }}
+            </span>
+          </div>
 
-      <dl class="reservation-details">
-        <div class="reservation-detail">
-          <dt><img src="assets/svg/location-green.svg" alt="" width="18" height="18" />Location</dt>
-          <dd>{{ invite.LocationAddress }}</dd>
-        </div>
-        <div class="reservation-detail">
-          <dt><img src="assets/svg/calendar-green.svg" alt="" width="18" height="18" />Date</dt>
-          <dd>{{ invite.StartTime | date: 'MMM d, y' : 'UTC' }}</dd>
-        </div>
-        <div class="reservation-detail">
-          <dt><img src="assets/svg/clock-green.svg" alt="" width="18" height="18" />Time</dt>
-          <dd>
-            {{ invite.StartTime | date: 'HH:mm' : 'UTC' }}–{{
-              invite.EndTime | date: 'HH:mm' : 'UTC'
-            }}
-          </dd>
-        </div>
-        <div class="reservation-detail">
-          <dt><img src="assets/svg/people-green.svg" alt="" width="18" height="18" />Guests</dt>
-          <dd>{{ participants.length }} of {{ invite.MaxGuestCount }} guests</dd>
-        </div>
-      </dl>
-    </header>
+          <dl class="reservation-details">
+            <div class="reservation-detail">
+              <dt>
+                <img src="assets/svg/location-green.svg" alt="" width="18" height="18" />Location
+              </dt>
+              <dd>{{ reservation.LocationAddress }}</dd>
+            </div>
+            <div class="reservation-detail">
+              <dt><img src="assets/svg/calendar-green.svg" alt="" width="18" height="18" />Date</dt>
+              <dd>{{ reservation.StartTime | date: 'MMM d, y' : 'UTC' }}</dd>
+            </div>
+            <div class="reservation-detail">
+              <dt><img src="assets/svg/clock-green.svg" alt="" width="18" height="18" />Time</dt>
+              <dd>
+                {{ reservation.StartTime | date: 'HH:mm' : 'UTC' }}–{{
+                  reservation.EndTime | date: 'HH:mm' : 'UTC'
+                }}
+              </dd>
+            </div>
+            <div class="reservation-detail">
+              <dt><img src="assets/svg/people-green.svg" alt="" width="18" height="18" />Guests</dt>
+              <dd>{{ participants().length }} of {{ reservation.MaxGuestCount }} guests</dd>
+            </div>
+          </dl>
+        </header>
 
-    @if (pendingParticipantCount > 0) {
-      <aside class="pending-banner" aria-live="polite">
-        <img src="assets/svg/bell-regular.svg" alt="" width="20" height="20" />
-        <span>
-          <strong>{{ pendingParticipantCount }} participants</strong> haven't submitted their cart
-          yet…
-        </span>
-      </aside>
-    }
+        @if (pendingParticipantCount() > 0) {
+          <aside class="pending-banner" aria-live="polite">
+            <img src="assets/svg/bell-regular.svg" alt="" width="20" height="20" />
+            <strong>{{ pendingParticipantMessage() }}</strong>
+          </aside>
+        }
 
-    <ul class="participants" aria-label="Group order participants">
-      @for (person of participants; track person.id) {
-        <li><app-participant-card [participant]="person" /></li>
+        @if (isEmpty()) {
+          <div class="screen-state empty-state">Participants haven't added any dishes yet</div>
+        } @else {
+          <ul class="participants" aria-label="Group order participants">
+            @for (person of participants(); track person.id) {
+              <li>
+                <app-participant-card
+                  [participant]="person"
+                  [isMe]="person.id === guestSessionId()"
+                />
+              </li>
+            }
+          </ul>
+
+          <section class="consolidated-order" aria-labelledby="consolidated-order-title">
+            <h2 id="consolidated-order-title">Consolidated pre-order</h2>
+            @if (consolidatedOrder().items.length > 0) {
+              <ul>
+                @for (item of consolidatedOrder().items; track item.dish.id) {
+                  <li>
+                    <span>{{ item.dish.name }} × {{ item.quantity }}</span>
+                    <strong>{{ item.dish.price * item.quantity | currency }}</strong>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p>No confirmed dishes yet</p>
+            }
+          </section>
+        }
+
+        <footer class="order-summary">
+          <p class="grand-total">
+            <span>Grand Total</span>
+            <strong>{{ consolidatedOrder().total | currency }}</strong>
+          </p>
+          @if (status() === 'Open') {
+            <button
+              class="submit-button"
+              type="button"
+              [disabled]="!canSubmit()"
+              (click)="openSubmitDialog()"
+            >
+              Submit Pre-Order
+            </button>
+          }
+        </footer>
       }
-    </ul>
-
-    <footer class="order-summary">
-      <p class="grand-total">
-        <span>Grand Total</span>
-        <strong>{{ grandTotal | currency }}</strong>
-      </p>
-      <button class="submit-button" type="button">Submit Pre-Order</button>
-    </footer>
+    }
   </section>
 </main>
+
+@if (showSubmitDialog()) {
+  <app-modal
+    title="Submit Pre-Order"
+    [closeOnBackdrop]="!isSubmitting()"
+    (closed)="closeSubmitDialog()"
+  >
+    <p class="confirmation-copy">
+      Submit the consolidated pre-order to the restaurant? This action cannot be undone.
+    </p>
+    <div modal-actions class="dialog-actions">
+      <button
+        class="secondary-button"
+        type="button"
+        [disabled]="isSubmitting()"
+        (click)="closeSubmitDialog()"
+      >
+        Cancel
+      </button>
+      <button
+        class="primary-button"
+        type="button"
+        [disabled]="isSubmitting()"
+        (click)="submitPreOrder()"
+      >
+        {{ isSubmitting() ? 'Submitting…' : 'Submit' }}
+      </button>
+    </div>
+  </app-modal>
+}
