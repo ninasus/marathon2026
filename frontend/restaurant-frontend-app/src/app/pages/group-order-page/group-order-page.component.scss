@@ -36,12 +36,17 @@ h1 {
   line-height: 1.2;
 }
 
-.order-type {
+.status-badge {
   padding: 5px 12px;
   border-radius: 999px;
-  background: color.$neutral-200;
-  color: color.$neutral-700;
+  background: color.$green-100;
+  color: color.$green-800;
   font-size: 0.75rem;
+}
+
+.status-badge--submitted {
+  background: color.$orange-100;
+  color: color.$orange-600;
 }
 
 .reservation-details {
@@ -97,6 +102,66 @@ h1 {
   list-style: none;
 }
 
+.consolidated-order {
+  margin-top: 24px;
+  padding: 22px 20px;
+  border-radius: 14px;
+  background: color.$neutral-0;
+  box-shadow: 0 8px 24px color.$shadow;
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid color.$neutral-100;
+  }
+
+  li:last-child {
+    border-bottom: 0;
+  }
+
+  p {
+    margin: 0;
+    color: color.$neutral-600;
+  }
+}
+
+.screen-state {
+  padding: 48px 24px;
+  border-radius: 14px;
+  background: color.$neutral-0;
+  color: color.$neutral-600;
+  text-align: center;
+}
+
+.error-state {
+  h1 {
+    margin-bottom: 16px;
+    color: color.$neutral-900;
+  }
+
+  p {
+    margin: 0 0 20px;
+  }
+}
+
+.empty-state {
+  margin-top: 24px;
+}
+
 .order-summary {
   margin-top: 8px;
   padding-top: 20px;
@@ -129,10 +194,55 @@ h1 {
   font-weight: 600;
   cursor: pointer;
 
+  &:disabled {
+    background: color.$neutral-400;
+    cursor: not-allowed;
+  }
+
   &:focus-visible {
     outline: 3px solid color.$green-300;
     outline-offset: 3px;
   }
+}
+
+.confirmation-copy {
+  margin: 0;
+  color: color.$neutral-700;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.primary-button {
+  border: 0;
+  background: color.$green-600;
+  color: color.$neutral-0;
+}
+
+.secondary-button {
+  border: 1px solid color.$neutral-400;
+  background: color.$neutral-0;
+  color: color.$neutral-700;
 }
 
 @media (max-width: 520px) {
