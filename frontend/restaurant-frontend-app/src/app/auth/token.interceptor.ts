@@ -19,11 +19,9 @@ export const tokenInterceptor: HttpInterceptorFn = (
   const isOwnerGroupSessionsRequest =
     req.method === 'GET' && /\/guest\/groups\/[^/?]+\/sessions(?:\?|$)/.test(req.url);
 
-  // IMPORTANT: do not modify Guest endpoints at all.
-  // Guest flow uses a different token (guest session token) and we must not touch the body.
-  // Otherwise we break POST /guest/sessions payload.
-  // The owner-only GET /guest/groups/{id}/sessions is the sole exception and requires Cognito.
-  if (req.url.includes('/guest/') && !isOwnerGroupSessionsRequest) {
+ // Public guest-session and invite calls use their own credentials and must stay unchanged.
+  // Owner-only /guest/groups/... calls continue through the authenticated path below.
+  if (req.url.includes('/guest/sessions') || req.url.includes('/guest/invites')) {
     return next(req).pipe(
       catchError((error: HttpErrorResponse) => {
         console.log(error);
