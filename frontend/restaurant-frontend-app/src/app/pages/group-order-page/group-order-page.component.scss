@@ -56,6 +56,42 @@ h1 {
   margin: 22px 0 0;
 }
 
+.sync-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+
+  p {
+    margin: 0;
+    color: color.$neutral-600;
+    font-size: 0.875rem;
+  }
+}
+
+.refresh-button {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid color.$green-600;
+  border-radius: 8px;
+  background: color.$neutral-0;
+  color: color.$green-600;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px solid color.$green-300;
+    outline-offset: 3px;
+  }
+}
+
 .reservation-detail {
   display: flex;
   align-items: center;

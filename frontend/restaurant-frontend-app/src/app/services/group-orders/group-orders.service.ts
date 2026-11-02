@@ -61,7 +61,8 @@ export class GroupOrdersService {
     const request: SubmitGroupPreOrderRequest = { reservationId };
     return this.http.post<SubmittedDish[]>(
       `${this.baseUrl}/group-reservations/${encodeURIComponent(groupReservationId)}/submit`,
-      request
+      request,
+      { context: new HttpContext().set(SKIP_ERROR_TOAST, true) }
     );
   }
 
