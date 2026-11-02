@@ -42,6 +42,27 @@
               <dd>{{ participants().length }} of {{ reservation.MaxGuestCount }} guests</dd>
             </div>
           </dl>
+
+          <div class="sync-status" aria-live="polite">
+            <p>
+              @if (refreshFailed()) {
+                Couldn't refresh. Showing data from
+              } @else {
+                Updated at
+              }
+              {{ updatedAt() | date: 'HH:mm:ss' }}
+            </p>
+            @if (status() === 'Open') {
+              <button
+                class="refresh-button"
+                type="button"
+                [disabled]="isRefreshing()"
+                (click)="refresh()"
+              >
+                Refresh
+              </button>
+            }
+          </div>
         </header>
 
         @if (pendingParticipantCount() > 0) {

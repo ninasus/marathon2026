@@ -16,11 +16,14 @@ export const tokenInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ) => {
   const toastr = inject(ToastService);
+  const isOwnerGroupSessionsRequest =
+    req.method === 'GET' && /\/guest\/groups\/[^/?]+\/sessions(?:\?|$)/.test(req.url);
 
   // IMPORTANT: do not modify Guest endpoints at all.
   // Guest flow uses a different token (guest session token) and we must not touch the body.
   // Otherwise we break POST /guest/sessions payload.
-  if (req.url.includes('/guest/')) {
+  // The owner-only GET /guest/groups/{id}/sessions is the sole exception and requires Cognito.
+  if (req.url.includes('/guest/') && !isOwnerGroupSessionsRequest) {
     return next(req).pipe(
       catchError((error: HttpErrorResponse) => {
         console.log(error);
@@ -34,7 +37,10 @@ export const tokenInterceptor: HttpInterceptorFn = (
           errorMessage = error.error.message;
         }
 
-        // For guest endpoints, you may still show toast if you want:
+        if (req.context.get(SKIP_ERROR_TOAST)) {
+          return throwError(() => error);
+        }
+
         switch (error.status) {
           case 400:
             toastr.error(errorMessage || 'Bad request.', 'Error');
